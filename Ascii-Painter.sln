@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.16
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ascii-Painter", "Ascii-Painter\Ascii-Painter.csproj", "{B338B513-7FD3-415C-B8A9-DC6754A2AD2F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B338B513-7FD3-415C-B8A9-DC6754A2AD2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B338B513-7FD3-415C-B8A9-DC6754A2AD2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B338B513-7FD3-415C-B8A9-DC6754A2AD2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B338B513-7FD3-415C-B8A9-DC6754A2AD2F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C92AB51F-194D-4AFF-B6E2-528CEA1566FE}
+	EndGlobalSection
+EndGlobal
