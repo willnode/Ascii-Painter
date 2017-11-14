@@ -66,10 +66,19 @@ namespace Ascii_Painter
 
         public Size BlockSize { get
             {
-                var s = TextRenderer.MeasureText("\0", Font, Size, TextFormatFlags.NoClipping | TextFormatFlags.NoPadding);
-                return new Size(s.Width, s.Height);
+
+                var s = TextRenderer.MeasureText("-----", Font, Size);
+                return new Size(s.Width / 5, s.Height); // width accuracy trick
             }
-        }//new Size(Font.Height, Font.Height);
+        }
+
+        public Size BlockGlyphOffset(Graphics g)
+        {
+ 
+                var s = g.MeasureString("-", Font, Size);
+                var r = BlockSize; // because there're some margin behind
+                return new Size(-((int)s.Width - r.Width) / 2, -((int)s.Height - r.Height) / 2);
+        }
 
         public Size ImageSize { get => _imgsize; set { if (value != _imgsize) { _imgsize = value; characters = new char[value.Width * value.Height]; if (CausesValidation) Invalidate(); undostack.Clear(); Size = GetPreferredSize(Size); } } }
 
@@ -140,7 +149,6 @@ namespace Ascii_Painter
                 int x = 0, y = 0, i = 0, j = 0;
                 int m = ImageSize.Width, n = ImageSize.Height;
                 int u = BlockSize.Width, v = BlockSize.Height;
-                //int p = Selection.X, q = Selection.Y, r = Selection.Width, s = Selection.Height;
                 int w = Math.Min(u * m, Width), h = Math.Min(n * v, Height);
                 var bc = new Pen(new SolidBrush(BorderColor));
 
@@ -163,33 +171,35 @@ namespace Ascii_Painter
             base.OnPaint(e);
 
             var g = e.Graphics;
-            int m = ImageSize.Width, n = ImageSize.Height;
-            int u = BlockSize.Width, v = BlockSize.Height;
-            int a = SelectionCursor.X, b = SelectionCursor.Y;
-            int p = Selection.X, q = Selection.Y, r = Selection.Width, s = Selection.Height;
-            //int w = Math.Min(u * m, Width), h = Math.Min(n * v, Height);
+            var i = ImageSize;
+            var b = BlockSize;
+            var c = SelectionCursor;
+            var s = Selection;
+            var o = BlockGlyphOffset(g);
+
+            int ix = i.Width, iy = i.Height, bx = b.Width, by = b.Height;
+            int cx = c.X, cy = c.Y, ox = o.Width, oy = o.Height;
+            int sx = s.X, sy = s.Y, tx = s.Width, ty = s.Height;
+
             var tc = new SolidBrush(SelectionColor);
             var cc = new SolidBrush(SelectionCursorColor);
             var fc = new SolidBrush(ForeColor);
 
             // Selection
-            g.FillRectangle(tc, new Rectangle(p * u, q * v, r * u, s * v));
+            g.FillRectangle(tc, new Rectangle(sx * bx, sy * by, tx * bx, ty * by));
 
             // Cursor
             if (Tool == CanvasTool.Freetype)
-                g.FillRectangle(cc, new Rectangle(a * u, b * v, u, v));
+                g.FillRectangle(cc, new Rectangle(cx * bx, cy * by, bx, by));
 
             for (int z = 0; z < characters.Length; z++)
             {
-                var c = characters[z];
-                if (!Utility.IsBlank(c))
+                var ch = characters[z];
+                if (!Utility.IsBlank(ch))
                 {
-                    var zm = Math.DivRem(z, m, out var zr);
-                    g.DrawString(c < '\x256' ? asciis[c] : new string(c, 1), Font, fc,
-                     new PointF(zr * u, zm * v));
-                    //TextRenderer.DrawText(g, c < '\x256' ? asciis[c] : new string(c, 1)
-                    //    , Font, new Point(zr * u, zm * v), ForeColor, TextFormatFlags.NoClipping | TextFormatFlags.NoPadding);
-
+                    var zm = Math.DivRem(z, ix, out var zr);
+                    g.DrawString(ch < '\x256' ? asciis[ch] : new string(ch, 1), Font, fc,
+                     new PointF(zr * bx + ox, zm * by + oy));                 
                 }
             }
         }

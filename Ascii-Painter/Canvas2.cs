@@ -310,6 +310,20 @@ namespace Ascii_Painter
                         for (int x = 0; x < w; x++)
                             dest[(w - x - 1) * h + y] = c[x + y * w];
                     break;
+
+                case CanvasMirror.TransposeXY:
+                    Selection = new Rectangle(Selection.X, Selection.Y, h, w);
+                    for (int y = 0; y < h; y++)
+                        for (int x = 0; x < w; x++)
+                            dest[y + x * w] = c[x + y * w];
+                    break;
+
+                case CanvasMirror.TransposeYX:
+                    Selection = new Rectangle(Selection.X, Selection.Y, h, w);
+                    for (int y = 0; y < h; y++)
+                        for (int x = 0; x < w; x++)
+                            dest[(w - x - 1) * w + (h - y - 1)] = c[x + y * w];
+                    break;
             }
 
             CharactersAt(Selection, dest);

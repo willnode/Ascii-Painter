@@ -31,7 +31,6 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolArt = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.panel1 = new System.Windows.Forms.Panel();
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.menuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -51,14 +50,14 @@
             this.fontToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.versionStrip = new System.Windows.Forms.ToolStripMenuItem();
-            this.keymapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this._sel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.panel1 = new Ascii_Painter.CustomPanel();
             this.canvas = new Ascii_Painter.Canvas();
-            this.panel1.SuspendLayout();
             this.menuStrip.SuspendLayout();
             this.statusStrip.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStripSeparator1
@@ -77,16 +76,6 @@
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(6, 23);
-            // 
-            // panel1
-            // 
-            this.panel1.AutoScroll = true;
-            this.panel1.Controls.Add(this.canvas);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(0, 27);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(878, 315);
-            this.panel1.TabIndex = 2;
             // 
             // menuStrip
             // 
@@ -120,7 +109,7 @@
             // 
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
             this.newToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.newToolStripMenuItem.Text = "New";
             this.newToolStripMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click);
             // 
@@ -128,7 +117,7 @@
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
@@ -136,7 +125,7 @@
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -241,7 +230,6 @@
             // 
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.versionStrip,
-            this.keymapToolStripMenuItem,
             this.aboutToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 23);
@@ -251,19 +239,13 @@
             // 
             this.versionStrip.Enabled = false;
             this.versionStrip.Name = "versionStrip";
-            this.versionStrip.Size = new System.Drawing.Size(117, 22);
+            this.versionStrip.Size = new System.Drawing.Size(107, 22);
             this.versionStrip.Text = "V1.X";
-            // 
-            // keymapToolStripMenuItem
-            // 
-            this.keymapToolStripMenuItem.Name = "keymapToolStripMenuItem";
-            this.keymapToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
-            this.keymapToolStripMenuItem.Text = "Keymap";
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -283,6 +265,18 @@
             this._sel.Size = new System.Drawing.Size(107, 17);
             this._sel.Text = "Selection: X, Y W:H";
             // 
+            // panel1
+            // 
+            this.panel1.AutoScroll = true;
+            this.panel1.AutoScrollMargin = new System.Drawing.Size(10, 10);
+            this.panel1.AutoScrollMinSize = new System.Drawing.Size(1000, 1000);
+            this.panel1.Controls.Add(this.canvas);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel1.Location = new System.Drawing.Point(0, 27);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(878, 315);
+            this.panel1.TabIndex = 2;
+            // 
             // canvas
             // 
             this.canvas.AutoSize = true;
@@ -295,11 +289,11 @@
             this.canvas.ImeMode = System.Windows.Forms.ImeMode.On;
             this.canvas.Location = new System.Drawing.Point(0, 0);
             this.canvas.Name = "canvas";
-            this.canvas.Selection = new System.Drawing.Rectangle(1, 1, 2, 2);
+            this.canvas.Selection = new System.Drawing.Rectangle(0, 0, 1, 1);
             this.canvas.SelectionColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(167)))), ((int)(((byte)(204)))));
-            this.canvas.SelectionCursor = new System.Drawing.Point(1, 1);
+            this.canvas.SelectionCursor = new System.Drawing.Point(0, 0);
             this.canvas.SelectionCursorColor = System.Drawing.Color.Gold;
-            this.canvas.Size = new System.Drawing.Size(1600, 850);
+            this.canvas.Size = new System.Drawing.Size(900, 850);
             this.canvas.TabIndex = 0;
             this.canvas.Tool = Ascii_Painter.CanvasTool.Select;
             this.canvas.ToolArt = '\0';
@@ -307,6 +301,7 @@
             this.canvas.SelectionChanged += new Ascii_Painter.CanvasSelectionChanged(this.canvas_SelectionChanged);
             this.canvas.ToolChanged += new Ascii_Painter.CanvasToolChanged(this.canvas_ToolChanged);
             this.canvas.Load += new System.EventHandler(this.canvas_Load);
+            this.canvas.Resize += new System.EventHandler(this.canvas_Resize);
             // 
             // Form1
             // 
@@ -321,12 +316,12 @@
             this.Name = "Form1";
             this.Text = "Ascii-Painter";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -338,7 +333,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripTextBox toolArt;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.Panel panel1;
+        private CustomPanel panel1;
         private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.ToolStripMenuItem menuToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
@@ -357,7 +352,6 @@
         private System.Windows.Forms.ToolStripMenuItem fontToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem versionStrip;
-        private System.Windows.Forms.ToolStripMenuItem keymapToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel _sel;

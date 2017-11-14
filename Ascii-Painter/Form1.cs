@@ -35,7 +35,9 @@ namespace Ascii_Painter
                 if (size != null)
                     canvas.ImageSize = (Size)new SizeConverter().ConvertFromString(size);
 
+                canvas.Gridlines = gridlinesToolStripMenuItem.Checked = (int)reg.GetValue("Gridlines", 1) == 1;
                 canvas.Text = (string)reg.GetValue("Text", null);
+
 
             }
             catch (Exception) { }
@@ -184,7 +186,7 @@ namespace Ascii_Painter
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Ascii-Painter made with <3 by WelloSoft. Click OK to visit Repo.", "About Ascii-Painter", MessageBoxButtons.OKCancel) == DialogResult.OK)
+            if (MessageBox.Show("Ascii-Painter made with <3 by WelloSoft. Need help? Visit Repo by clicking OK.", "About Ascii-Painter", MessageBoxButtons.OKCancel) == DialogResult.OK)
             {
                 Process.Start("https://github.com/willnode/Ascii-Painter");
             }
@@ -219,6 +221,21 @@ namespace Ascii_Painter
             var reg = Utility.GetRegPath();
             reg.SetValue("Size", new SizeConverter().ConvertToString(canvas.ImageSize));
             reg.SetValue("Text", canvas.Text);
+            reg.SetValue("Gridlines", canvas.Gridlines ? 1 : 0);
+        }
+
+        private void canvas_Resize(object sender, EventArgs e)
+        {
+            panel1.AutoScrollMinSize = canvas.Size;
+        }
+    }
+
+    public class CustomPanel : Panel
+    {
+        protected override Point ScrollToControl(Control activeControl)
+        {
+            // prevent autoscrolling to zero
+            return DisplayRectangle.Location;
         }
     }
 }
