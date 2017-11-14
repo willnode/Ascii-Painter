@@ -19,18 +19,48 @@ namespace Ascii_Painter
         {
             InitializeComponent();
 
-            canvas.Text = "Hello\nWorld\nI'm\nComing\n  Now";
 
             versionStrip.Text = "V" + Assembly.GetEntryAssembly().GetName().Version.ToString();
 
-            flipXToolStripMenuItem.Tag = CanvasMirror.MirrorX;
-            flipYToolStripMenuItem.Tag = CanvasMirror.MirrorY;
-            rotateCCWToolStripMenuItem.Tag = CanvasMirror.RotateCCW;
-            rotateCWToolStripMenuItem.Tag = CanvasMirror.RotateCW;
+            try
+            {
+                Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
+
+                var reg = Utility.GetRegPath();
+                var set = (string)reg.GetValue("Font", null);
+                var size = (string)reg.GetValue("Size", null);
+
+                if (set != null)
+                    canvas.Font = (Font)new FontConverter().ConvertFromString(set);
+                if (size != null)
+                    canvas.ImageSize = (Size)new SizeConverter().ConvertFromString(size);
+
+                canvas.Text = (string)reg.GetValue("Text", null);
+
+            }
+            catch (Exception) { }
+
 
             int iter = 0;
+
+            foreach (int v in Enum.GetValues(typeof(CanvasMirror)))
+            {
+                if (v < 0) continue;
+                var btn = new ToolStripMenuItem
+                {
+                    Name = "btnFlip" + iter,
+                    Text = Enum.GetName(typeof(CanvasMirror), v),
+                    Tag = (CanvasMirror)v,
+                    DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
+                };
+                btn.Click += flipXToolStripMenuItem_Click;
+                flipStrip.DropDownItems.Add(btn);
+            }
+
+            iter = 0;
             foreach (int v in Enum.GetValues(typeof(CanvasTool)))
             {
+                if (v < 0) continue;
                 var btn = new ToolStripButton
                 {
                     Name = "btn" + iter,
@@ -44,9 +74,9 @@ namespace Ascii_Painter
                     btn.Checked = true;
                     checkedTool = btn;
                 }
-                toolHotKeys.Add((Keys)(111 + iter), btn);
+                toolHotKeys.Add((Keys)(111 + iter), btn); // Fn keys
                 btn.Click += _tool_Click;
-                toolStrip.Items.Add(btn);
+                menuStrip.Items.Add(btn);
                 toolButtons.Add(btn);
             }
         }
@@ -78,9 +108,7 @@ namespace Ascii_Painter
 
         private void _tool_Click(object sender, EventArgs e)
         {
-            checkedTool.Checked = false;
-            canvas.Tool = (CanvasTool)(checkedTool = ((ToolStripButton)sender)).Tag;
-            checkedTool.Checked = true;
+            canvas.Tool = (CanvasTool)(((ToolStripButton)sender)).Tag;
 
         }
 
@@ -121,7 +149,7 @@ namespace Ascii_Painter
             var n = new NewCanvasDialog(canvas.ImageSize);
             if (n.ShowDialog() == DialogResult.OK)
             {
-                if (n.Clear)    
+                if (n.Clear)
                     canvas.ImageSize = n.Resolution;
                 else
                 {
@@ -139,14 +167,14 @@ namespace Ascii_Painter
                 AddExtension = true,
                 DefaultExt = "txt",
                 OverwritePrompt = true,
-                Filter = "Text Files|*.txt|All Files|*.*"                
+                Filter = "Text Files|*.txt|All Files|*.*"
             };
 
             if (n.ShowDialog() == DialogResult.OK)
             {
                 File.WriteAllText(n.FileName, canvas.Text);
             }
-          
+
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -156,10 +184,41 @@ namespace Ascii_Painter
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-          if (MessageBox.Show("Ascii-Painter made with <3 by WelloSoft. Click OK to visit Repo.", "About Ascii-Painter", MessageBoxButtons.OKCancel) == DialogResult.OK)
+            if (MessageBox.Show("Ascii-Painter made with <3 by WelloSoft. Click OK to visit Repo.", "About Ascii-Painter", MessageBoxButtons.OKCancel) == DialogResult.OK)
             {
                 Process.Start("https://github.com/willnode/Ascii-Painter");
             }
+        }
+
+        private void canvas_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void canvas_ToolChanged(object sender, EventArgs args)
+        {
+            checkedTool.Checked = false;
+            (checkedTool = toolButtons[(int)canvas.Tool]).Checked = true;
+        }
+
+        private void fontToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var diag = new FontDialog();
+            diag.Font = canvas.Font;
+            diag.FontMustExist = true;
+            diag.FixedPitchOnly = true;
+            if (diag.ShowDialog() == DialogResult.OK)
+            {
+                canvas.Font = diag.Font;
+                Utility.GetRegPath().SetValue("Font", new FontConverter().ConvertToString(diag.Font));
+            }
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            var reg = Utility.GetRegPath();
+            reg.SetValue("Size", new SizeConverter().ConvertToString(canvas.ImageSize));
+            reg.SetValue("Text", canvas.Text);
         }
     }
 }

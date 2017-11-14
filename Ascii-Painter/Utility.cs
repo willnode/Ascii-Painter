@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -96,6 +97,13 @@ namespace Ascii_Painter
             return Math.PI * (3 * (a + b) - Math.Sqrt((3 * a + b) * (a + 3 * b)));
         }
 
+        static public RegistryKey GetRegPath()
+        {
+            RegistryKey key = Registry.CurrentUser.OpenSubKey("Software", true);
+
+            key.CreateSubKey("AsciiPainter");
+            return key.OpenSubKey("AsciiPainter", true);
+        }
 
     }
 }

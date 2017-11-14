@@ -368,6 +368,11 @@ namespace Ascii_Painter
 
         public bool IsCursorFree => Selection.Width <= 1 && Selection.Height <= 1;
 
+        public void RecordUndo()
+        {
+            RecordUndo(MakeState(true));
+        }
+
         public void RecordUndo(CanvasState state)
         {
             if (undostack.Count > 0 && undostack.Last.Equals(state))
@@ -391,7 +396,7 @@ namespace Ascii_Painter
                 }
             }
             else
-                Console.Beep();
+                SystemSounds.Beep.Play();
         }
 
         CanvasState MakeState(bool whole)
@@ -510,7 +515,7 @@ namespace Ascii_Painter
 
             while (y >= 0 && x <= a)
             {
-                var character = '+';
+                var character = ToolArt == '\0' ? Utility.GetLineChar() : ToolArt;
                 CharacterAt(xc + x, yc + y, character);
 
                 if (x != 0 || y != 0)
@@ -577,5 +582,7 @@ namespace Ascii_Painter
         MirrorY,
         RotateCW,
         RotateCCW,
+        TransposeXY,
+        TransposeYX,
     }
 }

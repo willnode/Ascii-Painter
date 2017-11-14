@@ -14,6 +14,7 @@ namespace Ascii_Painter
 
     public enum CanvasTool
     {
+        None = -1,
         Select,
         Freetype,
         Dragdrop,
@@ -25,10 +26,14 @@ namespace Ascii_Painter
 
     public delegate void CanvasSelectionChanged(Object sender, EventArgs args);
 
+    public delegate void CanvasToolChanged(Object sender, EventArgs args);
+
     public partial class Canvas : UserControl
     {
 
-        public CanvasTool Tool { get => _tool; set { if (_tool != value) { _tool = value; if (CausesValidation) Invalidate(); } } }
+        public CanvasTool Tool { get => _tool; set { if (_tool != value) { _tool = value; if (value == ToolFallback) ToolFallback = CanvasTool.None; if (CausesValidation) Invalidate(); ToolChanged?.Invoke(this, EventArgs.Empty); } } }
+
+        public CanvasTool ToolFallback { get; set; } = CanvasTool.None;
 
         public char ToolArt { get; set; } = '\0';
 
@@ -59,9 +64,14 @@ namespace Ascii_Painter
 
         public bool Gridlines { get => _gridlines; set { _gridlines = value; if (CausesValidation) Invalidate(); } }
 
-        public Size BlockSize => TextRenderer.MeasureText("-", Font, Size, TextFormatFlags.NoClipping | TextFormatFlags.NoPadding); //new Size(Font.Height, Font.Height);
+        public Size BlockSize { get
+            {
+                var s = TextRenderer.MeasureText("\0", Font, Size, TextFormatFlags.NoClipping | TextFormatFlags.NoPadding);
+                return new Size(s.Width, s.Height);
+            }
+        }//new Size(Font.Height, Font.Height);
 
-        public Size ImageSize { get => _imgsize; set { if (value != _imgsize) { _imgsize = value; characters = new char[value.Width * value.Height]; if (CausesValidation) Invalidate(); undostack.Clear(); } } }
+        public Size ImageSize { get => _imgsize; set { if (value != _imgsize) { _imgsize = value; characters = new char[value.Width * value.Height]; if (CausesValidation) Invalidate(); undostack.Clear(); Size = GetPreferredSize(Size); } } }
 
         public Rectangle Selection { get => _selection; set { if (value != _selection) { _selection = Rectangle.Intersect(value, new Rectangle(Point.Empty, ImageSize)); _selection.Size = new Size(Math.Max(_selection.Width, 1), Math.Max(_selection.Height, 1)); SelectionCursor = _selection.Location; if (CausesValidation) Invalidate(); SelectionChanged?.Invoke(this, EventArgs.Empty); } } }
 
@@ -72,6 +82,8 @@ namespace Ascii_Painter
         public Color SelectionCursorColor { get; set; } = SystemColors.Info;
 
         public event CanvasSelectionChanged SelectionChanged;
+
+        public event CanvasToolChanged ToolChanged;
 
         public override string Text
         {
@@ -90,19 +102,20 @@ namespace Ascii_Painter
             set
             {
                 int seek = 0;
+                var text = value.Replace("\r", string.Empty);
                 for (int i = 0; i < value.Length; i++)
                 {
-                    if (value[i] == '\n')
+                    if (text[i] == '\n')
                     {
                         var dest = seek / _imgsize.Width + _imgsize.Width;
                         while (seek < dest)
                             characters[seek++] = ' ';
                     }
                     else
-                        characters[seek++] = value[i];
+                        characters[seek++] = text[i];
                 }
                 if (CausesValidation)
-                Invalidate();
+                    Invalidate();
             }
         }
 
@@ -119,7 +132,7 @@ namespace Ascii_Painter
 
             var g = e.Graphics;
             g.Clear(BackColor);
-            
+
 
             // Borders
             if (_gridlines)
@@ -173,7 +186,9 @@ namespace Ascii_Painter
                 {
                     var zm = Math.DivRem(z, m, out var zr);
                     g.DrawString(c < '\x256' ? asciis[c] : new string(c, 1), Font, fc,
-                       new PointF(zr * u, zm * v));
+                     new PointF(zr * u, zm * v));
+                    //TextRenderer.DrawText(g, c < '\x256' ? asciis[c] : new string(c, 1)
+                    //    , Font, new Point(zr * u, zm * v), ForeColor, TextFormatFlags.NoClipping | TextFormatFlags.NoPadding);
 
                 }
             }
@@ -222,6 +237,11 @@ namespace Ascii_Painter
                 case CanvasTool.Dragdrop:
                     _selection.Location = _drgdown;
                     MoveSelected(new Point((e.X - _seldown.X + _drgdown.X * u) / u, (e.Y - _seldown.Y + _drgdown.Y * v) / v));
+                    if (ToolFallback == CanvasTool.Select)
+                    {
+                        Tool = CanvasTool.Select;
+                        Cursor = Cursors.Default;
+                    }
                     break;
                 case CanvasTool.Brush:
                     break;
@@ -255,7 +275,7 @@ namespace Ascii_Painter
                     sel.Location = new Point((e.X - _seldown.X + _drgdown.X * u) / u, (e.Y - _seldown.Y + _drgdown.Y * v) / v);
                     Selection = sel;
                     break;
-                case CanvasTool.Brush:                    
+                case CanvasTool.Brush:
                     Selection = new Rectangle(e.X / u, e.Y / v, 1, 1);
                     CharacterAt(Selection.Location, ToolArt == '\0' ? ' ' : ToolArt);
                     break;
@@ -291,6 +311,20 @@ namespace Ascii_Painter
             if (e.Button != MouseButtons.Left) return;
             int u = BlockSize.Width, v = BlockSize.Height;
 
+            if (ModifierKeys == Keys.Control)
+            {
+                switch (Tool)
+                {
+                    case CanvasTool.Select:
+                        Tool = CanvasTool.Dragdrop;
+                        ToolFallback = CanvasTool.Select;
+                        Cursor = Cursors.SizeAll;
+                        break;
+                    default:
+                        return;
+                }
+            }
+
             switch (Tool)
             {
                 case CanvasTool.Select:
@@ -298,20 +332,27 @@ namespace Ascii_Painter
                     Selection = new Rectangle(_seldown.X / u, _seldown.Y / v, 1, 1);
                     break;
                 case CanvasTool.Freetype:
+                    if (ToolFallback == CanvasTool.Select)
+                    {
+                        Tool = CanvasTool.Select;
+                        Cursor = Cursors.Default;
+                    }
                     break;
                 case CanvasTool.Dragdrop:
                     _seldown = new Point(e.Location.X / u * u, e.Location.Y / v * v);
                     _drgdown = Selection.Location;
+                    RecordUndo();
                     break;
                 case CanvasTool.Brush:
                     Selection = new Rectangle(e.X / u, e.Y / v, 1, 1);
-                    RecordUndo(MakeState(true));
+                    RecordUndo();
                     break;
                 case CanvasTool.Line:
                 case CanvasTool.Circle:
                 case CanvasTool.Rectangle:
                     _seldown = new Point(e.Location.X / u, e.Location.Y / v);
                     _drwshot = (char[])characters.Clone();
+                    RecordUndo();
                     break;
                 default:
                     break;
@@ -360,42 +401,65 @@ namespace Ascii_Painter
                 }
                 e.Handled = true;
             }
-            if (e.Modifiers == Keys.None | e.Modifiers == Keys.Shift && Tool == CanvasTool.Freetype)
+
+            if (e.Modifiers == Keys.None | e.Modifiers == Keys.Shift)
             {
-                switch (e.KeyCode)
+                if (Tool == CanvasTool.Select)
                 {
-                    case Keys.Enter:
-                        GoToNextLine();
-                        break;
-                    case Keys.Back:
-                        Backspace(e.Modifiers == Keys.Shift);
-                        break;
-                    case Keys.Delete:
-                        Delete(e.Modifiers != Keys.Shift);
-                        break;
-                    case Keys.Insert:
-                        Insert(e.Modifiers == Keys.Shift);
-                        break;
-                    case Keys.Up:
-                        GoToUp();
-                        break;
-                    case Keys.Down:
-                        GoToDown();
-                        break;
-                    case Keys.Right:
-                        GoToRight();
-                        break;
-                    case Keys.Left:
-                        GoToLeft();
-                        break;
-                    default:
-                        var s = Utility.KeyCodeToUnicode(e.KeyCode);
-                        if (s.Length >= 1)
-                            Append(s[0]);
-                        break;
+                    if (Utility.KeyCodeToUnicode(e.KeyCode).Length >= 1)
+                    {
+                        Tool = CanvasTool.Freetype;
+                        ToolFallback = CanvasTool.Select;
+                        Cursor = Cursors.IBeam;
+                        RecordUndo();
+                    }
                 }
 
+                if (Tool == CanvasTool.Freetype)
+                {
+                    switch (e.KeyCode)
+                    {
+                        case Keys.Enter:
+                            if (ToolFallback == CanvasTool.Select && e.Modifiers == Keys.None)
+                            {
+                                Tool = CanvasTool.Select;
+                                Cursor = Cursors.Default;
+                            }
+                            else
+                                GoToNextLine();
+                            break;
+                        case Keys.Back:
+                            Backspace(e.Modifiers == Keys.Shift);
+                            break;
+                        case Keys.Delete:
+                            Delete(e.Modifiers != Keys.Shift);
+                            break;
+                        case Keys.Insert:
+                            Insert(e.Modifiers == Keys.Shift);
+                            break;
+                        case Keys.Up:
+                            GoToUp();
+                            break;
+                        case Keys.Down:
+                            GoToDown();
+                            break;
+                        case Keys.Right:
+                            GoToRight();
+                            break;
+                        case Keys.Left:
+                            GoToLeft();
+                            break;
+                        default:
+                            var s = Utility.KeyCodeToUnicode(e.KeyCode);
+                            if (s.Length >= 1)
+                                Append(s[0]);
+                            break;
+                    }
+
+                }
             }
+        
+           
         }
 
         public override Size GetPreferredSize(Size proposedSize)
