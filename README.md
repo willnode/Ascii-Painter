@@ -10,6 +10,7 @@ Ascii Painter is .NET based Text Painting tool. Create art in ASCII and paste it
 
 [Instruction](HOTKEY.md)
 
-# Fun
+# Example
 
-[Demo]
+https://user-images.githubusercontent.com/20214420/133871165-b6270ae4-496c-4ac0-8054-009a49c3c143.mp4
+
